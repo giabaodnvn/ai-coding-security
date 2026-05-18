@@ -1,6 +1,11 @@
 # Compiled binary
 claude-safe/claude-safe
 
+# Enterprise platform
+enterprise/frontend/.next/
+enterprise/frontend/node_modules/
+enterprise/backend/server
+
 # VSCode extension build output
 vscode-claude-safe/out/
 vscode-claude-safe/node_modules/
