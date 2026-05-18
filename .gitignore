@@ -1,0 +1,25 @@
+# Compiled binary
+claude-safe/claude-safe
+
+# Go build cache
+claude-safe/.claude-safe/
+claude-safe/.claude/
+
+# Test temp files
+*.tmp
+*.test
+
+# Windows artifact
+*.Zone.Identifier
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Secrets / local config
+.env
+*.local.yaml

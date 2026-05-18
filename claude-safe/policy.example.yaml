@@ -1,0 +1,17 @@
+block_dangerous_commands: true
+block_private_keys: true
+block_secrets: true
+max_risk_level: medium   # safe | low | medium | high | critical
+allow_sudo: false
+audit_log: true
+audit_log_path: .claude-safe/audit.log
+notify_on_block: true
+
+# Commands exempted from blocking (exact substring match)
+allow_list:
+  # - "rm -rf /tmp/ci-artifacts"
+  # - "docker system prune -a --volumes"
+
+# Additional commands to always block (beyond built-in rules)
+deny_list:
+  # - "curl http://"   # block non-HTTPS downloads
