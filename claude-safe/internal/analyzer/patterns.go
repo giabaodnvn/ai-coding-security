@@ -409,7 +409,7 @@ var allRules = []vulnRule{
 	{
 		id: "random-py-not-crypto",
 		vulnType: VulnInsecureRandom, severity: SevMedium,
-		pattern:   regexp.MustCompile(`(?i)(random\.random|random\.randint|random\.choice)\s*\(.*token|session|secret|key|password`),
+		pattern:   regexp.MustCompile(`(?i)(random\.random|random\.randint|random\.choice)\s*\(.*(token|session|secret|key|password)`),
 		languages: []Language{LangPython},
 		description: "random module is not cryptographically secure — predictable output",
 		remediation: "Use secrets.token_hex() or secrets.token_urlsafe() for security tokens",

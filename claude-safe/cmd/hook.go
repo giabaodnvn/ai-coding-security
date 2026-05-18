@@ -140,7 +140,7 @@ func hookAnalyzeContent(content, filePath, action string, pol *policy.Policy, lo
 	if codeReport.Stats.Total > 0 {
 		printCodeAnalysisSummary(filePath, codeReport)
 
-		if codeReport.RiskScore > 35 {
+		if codeReport.RiskScore > 0 {
 			logger.LogScan(filePath, riskReportFromScore(codeReport.RiskScore), true, "Code vulnerabilities detected")
 			fmt.Fprintf(os.Stderr, "\n\033[31m[claude-safe BLOCKED]\033[0m %s %s: %d code vulnerabilities detected (score %d/100)\n",
 				action, filePath, codeReport.Stats.Total, codeReport.RiskScore)

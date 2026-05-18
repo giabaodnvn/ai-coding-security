@@ -58,7 +58,7 @@ func (p *Policy) IsBlocked(report risk.Report) (bool, string) {
 
 	maxLevel := p.maxRiskLevel()
 
-	if levelOrder(report.Level) > levelOrder(maxLevel) {
+	if levelOrder(report.Level) >= levelOrder(maxLevel) && report.Level != risk.LevelSafe {
 		return true, fmt.Sprintf("Risk level %s exceeds policy maximum %s", report.Level, p.MaxRiskLevel)
 	}
 

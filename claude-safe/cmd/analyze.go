@@ -177,7 +177,7 @@ func riskReportFromScore(score int) risk.Report {
 	return risk.Report{
 		Score:       score,
 		Level:       scoreToRiskLevel(score),
-		ShouldBlock: score > 35,
+		ShouldBlock: score > 0,
 	}
 }
 
@@ -185,11 +185,11 @@ func scoreToRiskLevel(score int) risk.Level {
 	switch {
 	case score == 0:
 		return risk.LevelSafe
-	case score <= 15:
+	case score < 10:
 		return risk.LevelLow
-	case score <= 35:
+	case score < 25:
 		return risk.LevelMedium
-	case score <= 60:
+	case score < 40:
 		return risk.LevelHigh
 	default:
 		return risk.LevelCritical

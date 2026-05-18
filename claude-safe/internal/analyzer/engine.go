@@ -117,10 +117,10 @@ func calcScore(findings []CodeFinding) (Stats, int) {
 		switch f.Severity {
 		case SevCritical:
 			stats.Critical++
-			score += 35
+			score += 40
 		case SevHigh:
 			stats.High++
-			score += 20
+			score += 25
 		case SevMedium:
 			stats.Medium++
 			score += 10
@@ -140,11 +140,11 @@ func scoreToLevel(score int) string {
 	switch {
 	case score == 0:
 		return "SAFE"
-	case score <= 15:
+	case score < 10:
 		return "LOW"
-	case score <= 35:
+	case score < 25:
 		return "MEDIUM"
-	case score <= 60:
+	case score < 40:
 		return "HIGH"
 	default:
 		return "CRITICAL"
