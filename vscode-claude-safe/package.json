@@ -1,0 +1,112 @@
+{
+  "name": "claude-safe",
+  "displayName": "Claude Safe — AI Coding Security Guard",
+  "description": "Real-time security scanning for AI-generated code. Detects SQL injection, XSS, secrets, insecure crypto, and more.",
+  "version": "0.1.0",
+  "publisher": "claude-safe",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Linters", "Other"],
+  "keywords": ["security", "claude", "AI", "SAST", "secrets"],
+  "activationEvents": [
+    "onLanguage:go",
+    "onLanguage:python",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact",
+    "onLanguage:java",
+    "onLanguage:php",
+    "onLanguage:ruby"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claudeSafe.scanFile",
+        "title": "Claude Safe: Scan Current File"
+      },
+      {
+        "command": "claudeSafe.scanWorkspace",
+        "title": "Claude Safe: Scan Workspace"
+      },
+      {
+        "command": "claudeSafe.clearDiagnostics",
+        "title": "Claude Safe: Clear Diagnostics"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "claudeSafe",
+          "title": "Claude Safe Security",
+          "icon": "media/shield.svg"
+        }
+      ]
+    },
+    "views": {
+      "claudeSafe": [
+        {
+          "id": "claudeSafe.findings",
+          "name": "Security Findings"
+        },
+        {
+          "id": "claudeSafe.summary",
+          "name": "Scan Summary"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Claude Safe",
+      "properties": {
+        "claudeSafe.binaryPath": {
+          "type": "string",
+          "default": "claude-safe",
+          "description": "Path to the claude-safe binary. Defaults to 'claude-safe' (must be on PATH)."
+        },
+        "claudeSafe.policyFile": {
+          "type": "string",
+          "default": ".claude-safe/policy.yaml",
+          "description": "Path to the policy YAML file, relative to workspace root."
+        },
+        "claudeSafe.scanOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically scan files when saved."
+        },
+        "claudeSafe.scanOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically scan files when opened."
+        },
+        "claudeSafe.maxNotificationSeverity": {
+          "type": "string",
+          "default": "HIGH",
+          "enum": ["CRITICAL", "HIGH", "MEDIUM", "ALL"],
+          "description": "Minimum severity level that triggers a popup notification."
+        }
+      }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "claudeSafe.scanFile",
+          "group": "claudeSafe"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

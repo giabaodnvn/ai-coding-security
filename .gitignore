@@ -1,6 +1,11 @@
 # Compiled binary
 claude-safe/claude-safe
 
+# VSCode extension build output
+vscode-claude-safe/out/
+vscode-claude-safe/node_modules/
+vscode-claude-safe/*.vsix
+
 # Go build cache
 claude-safe/.claude-safe/
 claude-safe/.claude/
