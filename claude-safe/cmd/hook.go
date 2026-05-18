@@ -12,6 +12,7 @@ import (
 	"github.com/claude-safe/claude-safe/internal/audit"
 	"github.com/claude-safe/claude-safe/internal/command"
 	"github.com/claude-safe/claude-safe/internal/policy"
+	"github.com/claude-safe/claude-safe/internal/reporter"
 	"github.com/claude-safe/claude-safe/internal/risk"
 	"github.com/claude-safe/claude-safe/internal/secrets"
 )
@@ -61,21 +62,22 @@ This command is invoked automatically by .claude/hooks scripts — you don't nee
 			return nil // don't block Claude if policy missing
 		}
 		logger := audit.New(pol.AuditLogPath, pol.AuditLog)
+		rep := reporter.FromEnv()
 
 		switch input.ToolName {
 		case "Bash":
-			return hookBash(input.ToolInput, pol, logger)
+			return hookBash(input.ToolInput, pol, logger, rep)
 		case "Write":
-			return hookWrite(input.ToolInput, pol, logger)
+			return hookWrite(input.ToolInput, pol, logger, rep)
 		case "Edit":
-			return hookEdit(input.ToolInput, pol, logger)
+			return hookEdit(input.ToolInput, pol, logger, rep)
 		default:
 			return nil
 		}
 	},
 }
 
-func hookBash(raw json.RawMessage, pol *policy.Policy, logger *audit.Logger) error {
+func hookBash(raw json.RawMessage, pol *policy.Policy, logger *audit.Logger, rep *reporter.Reporter) error {
 	var ti bashToolInput
 	if err := json.Unmarshal(raw, &ti); err != nil || ti.Command == "" {
 		return nil
@@ -92,32 +94,37 @@ func hookBash(raw json.RawMessage, pol *policy.Policy, logger *audit.Logger) err
 
 	blocked, reason := pol.IsBlocked(report)
 	logger.LogScan(ti.Command, report, blocked, reason)
+	rep.Send(reporter.Event{
+		ToolName: "Bash", Input: ti.Command,
+		RiskLevel: string(report.Level), RiskScore: report.Score,
+		Blocked: blocked, Reason: reason,
+	})
 
 	if blocked {
 		fmt.Fprintf(os.Stderr, "\n\033[31m[claude-safe BLOCKED]\033[0m %s\n", reason)
-		os.Exit(2) // exit 2 = block the tool call in Claude Code
+		os.Exit(2)
 	}
 	return nil
 }
 
-func hookWrite(raw json.RawMessage, pol *policy.Policy, logger *audit.Logger) error {
+func hookWrite(raw json.RawMessage, pol *policy.Policy, logger *audit.Logger, rep *reporter.Reporter) error {
 	var ti writeToolInput
 	if err := json.Unmarshal(raw, &ti); err != nil || ti.Content == "" {
 		return nil
 	}
-	return hookAnalyzeContent(ti.Content, ti.FilePath, "Writing", pol, logger)
+	return hookAnalyzeContent(ti.Content, ti.FilePath, "Writing", pol, logger, rep)
 }
 
-func hookEdit(raw json.RawMessage, pol *policy.Policy, logger *audit.Logger) error {
+func hookEdit(raw json.RawMessage, pol *policy.Policy, logger *audit.Logger, rep *reporter.Reporter) error {
 	var ti editToolInput
 	if err := json.Unmarshal(raw, &ti); err != nil || ti.NewString == "" {
 		return nil
 	}
-	return hookAnalyzeContent(ti.NewString, ti.FilePath, "Editing", pol, logger)
+	return hookAnalyzeContent(ti.NewString, ti.FilePath, "Editing", pol, logger, rep)
 }
 
 // hookAnalyzeContent runs both secret detection and code vulnerability analysis.
-func hookAnalyzeContent(content, filePath, action string, pol *policy.Policy, logger *audit.Logger) error {
+func hookAnalyzeContent(content, filePath, action string, pol *policy.Policy, logger *audit.Logger, rep *reporter.Reporter) error {
 	// 1. Secret detection (Phase 1)
 	detector := secrets.New()
 	secretFindings := detector.ScanText(content)
@@ -129,6 +136,11 @@ func hookAnalyzeContent(content, filePath, action string, pol *policy.Policy, lo
 
 	blocked, reason := pol.IsBlocked(secretReport)
 	logger.LogScan(filePath, secretReport, blocked, reason)
+	rep.Send(reporter.Event{
+		ToolName: action, Input: filePath,
+		RiskLevel: string(secretReport.Level), RiskScore: secretReport.Score,
+		Blocked: blocked, Reason: reason,
+	})
 
 	if blocked {
 		fmt.Fprintf(os.Stderr, "\n\033[31m[claude-safe BLOCKED]\033[0m %s %s: %s\n", action, filePath, reason)
@@ -142,6 +154,11 @@ func hookAnalyzeContent(content, filePath, action string, pol *policy.Policy, lo
 
 		if codeReport.RiskScore > 0 {
 			logger.LogScan(filePath, riskReportFromScore(codeReport.RiskScore), true, "Code vulnerabilities detected")
+			rep.Send(reporter.Event{
+				ToolName: action, Input: filePath,
+				RiskLevel: codeReport.RiskLevel, RiskScore: codeReport.RiskScore,
+				Blocked: true, Reason: "Code vulnerabilities detected",
+			})
 			fmt.Fprintf(os.Stderr, "\n\033[31m[claude-safe BLOCKED]\033[0m %s %s: %d code vulnerabilities detected (score %d/100)\n",
 				action, filePath, codeReport.Stats.Total, codeReport.RiskScore)
 			os.Exit(2)
@@ -149,6 +166,11 @@ func hookAnalyzeContent(content, filePath, action string, pol *policy.Policy, lo
 
 		// Warn but don't block for medium/low
 		logger.LogScan(filePath, riskReportFromScore(codeReport.RiskScore), false, "")
+		rep.Send(reporter.Event{
+			ToolName: action, Input: filePath,
+			RiskLevel: codeReport.RiskLevel, RiskScore: codeReport.RiskScore,
+			Blocked: false,
+		})
 	}
 
 	return nil

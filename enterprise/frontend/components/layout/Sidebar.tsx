@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShieldCheck, LayoutDashboard, AlertTriangle, ScrollText, FileText, Users, Settings, LogOut } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, AlertTriangle, ScrollText, FileText, Users, Settings, LogOut, Key, Webhook } from "lucide-react";
 import clsx from "clsx";
 
 const nav = [
@@ -10,6 +10,8 @@ const nav = [
   { href: "/audit-logs",  label: "Audit Logs", icon: ScrollText },
   { href: "/policies",    label: "Policies",   icon: FileText },
   { href: "/developers",  label: "Developers", icon: Users },
+  { href: "/api-keys",    label: "API Keys",   icon: Key },
+  { href: "/webhooks",    label: "Webhooks",   icon: Webhook },
   { href: "/settings",    label: "Settings",   icon: Settings },
 ];
 

@@ -92,6 +92,16 @@ func (h *AuditHandler) Ingest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Blocked && userID != nil {
+		go FireWebhooks(h.db, userID, "blocked", map[string]interface{}{
+			"tool_name":  req.ToolName,
+			"input":      req.Input,
+			"risk_level": req.RiskLevel,
+			"risk_score": req.RiskScore,
+			"reason":     req.Reason,
+		})
+	}
+
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(`{"ok":true}`))
 }

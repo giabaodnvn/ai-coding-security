@@ -54,4 +54,26 @@ export const api = {
 
   deletePolicy: (id: string) =>
     request<void>(`/api/policies/${id}`, { method: "DELETE" }),
+
+  apiKeys: () => request<import("./types").APIKey[]>("/api/api-keys"),
+
+  createAPIKey: (name: string) =>
+    request<{ id: string; key: string; prefix: string }>("/api/api-keys", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    }),
+
+  deleteAPIKey: (id: string) =>
+    request<void>(`/api/api-keys/${id}`, { method: "DELETE" }),
+
+  webhooks: () => request<import("./types").Webhook[]>("/api/webhooks"),
+
+  createWebhook: (data: { name: string; url: string; secret: string; events: string[] }) =>
+    request<import("./types").Webhook>("/api/webhooks", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  deleteWebhook: (id: string) =>
+    request<void>(`/api/webhooks/${id}`, { method: "DELETE" }),
 };

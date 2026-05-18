@@ -73,6 +73,26 @@ type TimePoint struct {
 	Blocked int    `json:"blocked"`
 }
 
+type APIKey struct {
+	ID        string     `json:"id"`
+	UserID    string     `json:"user_id"`
+	Name      string     `json:"name"`
+	KeyPrefix string     `json:"key_prefix"`
+	LastUsed  *time.Time `json:"last_used"`
+	CreatedAt time.Time  `json:"created_at"`
+}
+
+type Webhook struct {
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	Name      string    `json:"name"`
+	URL       string    `json:"url"`
+	Secret    string    `json:"-"`
+	Events    []string  `json:"events"`
+	Active    bool      `json:"active"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // IngestRequest is posted by claude-safe CLI instances
 type IngestRequest struct {
 	UserEmail string          `json:"user_email"`

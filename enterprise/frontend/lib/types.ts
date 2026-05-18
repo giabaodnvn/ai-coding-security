@@ -47,6 +47,25 @@ export interface TimePoint {
   blocked: number;
 }
 
+export interface APIKey {
+  id: string;
+  user_id: string;
+  name: string;
+  key_prefix: string;
+  last_used: string | null;
+  created_at: string;
+}
+
+export interface Webhook {
+  id: string;
+  user_id: string;
+  name: string;
+  url: string;
+  events: string[];
+  active: boolean;
+  created_at: string;
+}
+
 export interface DashboardStats {
   total_events_today: number;
   blocked_today: number;
