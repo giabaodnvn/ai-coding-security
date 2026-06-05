@@ -102,6 +102,7 @@ func hookBash(raw json.RawMessage, pol *policy.Policy, logger *audit.Logger, rep
 
 	if blocked {
 		fmt.Fprintf(os.Stderr, "\n\033[31m[claude-safe BLOCKED]\033[0m %s\n", reason)
+		fmt.Fprintf(os.Stderr, "\n\033[33mTo run manually outside Claude Code:\033[0m\n  %s\n", ti.Command)
 		os.Exit(2)
 	}
 	return nil
