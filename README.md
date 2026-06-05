@@ -140,10 +140,12 @@ claude-safe — AI Coding Security Guard
 Commands:
   init        Initialize claude-safe in the current project (policy + hooks)
   scan        Scan code, files, or git diff for security issues
-              flags: --staged, --git-diff, --path <dir>, --format json|text
+              flags: --file <path>, --staged, --git-diff, --text <str>, --json
   analyze     Analyze a source file for vulnerabilities (SQLi, XSS, SSRF, crypto, …)
+              flags: --file <path>, --dir <path>, --lang <name>, --text <str>, --json
   hook        Process a Claude Code hook event from stdin
   run         Validate and execute a shell command after a security check
+  uninstall   Remove claude-safe hooks and config from the current project
 
 Global flags:
   -p, --policy <file>   Path to policy file (default: .claude-safe/policy.yaml)
