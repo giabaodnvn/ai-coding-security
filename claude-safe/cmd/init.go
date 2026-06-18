@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -27,11 +29,15 @@ var initCmd = &cobra.Command{
 		if err := initGitHook(); err != nil {
 			return err
 		}
+		if err := initGitIgnore(); err != nil {
+			return err
+		}
 		fmt.Println("\n\033[32m✓ claude-safe initialized successfully!\033[0m")
 		fmt.Println("\nWhat was set up:")
 		fmt.Println("  .claude-safe/policy.yaml   — security policy (edit to customize)")
 		fmt.Println("  .claude/settings.json       — Claude Code hooks (auto-scan on tool use)")
 		fmt.Println("  .git/hooks/pre-commit       — blocks commits containing secrets")
+		fmt.Println("  .gitignore                  — .claude-safe/ excluded from git")
 		fmt.Println("\nRun 'claude-safe scan --help' to get started.")
 		return nil
 	},
@@ -148,6 +154,41 @@ exit 0
 		return fmt.Errorf("writing git hook: %w", err)
 	}
 	fmt.Printf("  [created] %s\n", path)
+	return nil
+}
+
+func initGitIgnore() error {
+	const entry = ".claude-safe/"
+	path := ".gitignore"
+
+	data, err := os.ReadFile(path)
+	if err == nil {
+		scanner := bufio.NewScanner(strings.NewReader(string(data)))
+		for scanner.Scan() {
+			if strings.TrimSpace(scanner.Text()) == entry {
+				fmt.Printf("  [skip] %s already contains %s\n", path, entry)
+				return nil
+			}
+		}
+	}
+
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fmt.Errorf("opening .gitignore: %w", err)
+	}
+	defer f.Close()
+
+	// Ensure newline before appending if file exists and is non-empty
+	if len(data) > 0 && !strings.HasSuffix(string(data), "\n") {
+		if _, err := f.WriteString("\n"); err != nil {
+			return fmt.Errorf("writing .gitignore: %w", err)
+		}
+	}
+
+	if _, err := fmt.Fprintf(f, "# claude-safe\n%s\n", entry); err != nil {
+		return fmt.Errorf("writing .gitignore: %w", err)
+	}
+	fmt.Printf("  [updated] %s (added %s)\n", path, entry)
 	return nil
 }
 
