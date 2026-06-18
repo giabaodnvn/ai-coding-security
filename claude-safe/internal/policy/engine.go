@@ -13,6 +13,7 @@ type Policy struct {
 	BlockDangerousCommands bool     `yaml:"block_dangerous_commands"`
 	BlockPrivateKeys       bool     `yaml:"block_private_keys"`
 	BlockSecrets           bool     `yaml:"block_secrets"`
+	BlockSensitivePaths    bool     `yaml:"block_sensitive_paths"`
 	MaxRiskLevel           string   `yaml:"max_risk_level"`
 	AllowSudo              bool     `yaml:"allow_sudo"`
 	AllowList              []string `yaml:"allow_list"`
@@ -27,6 +28,7 @@ func Default() *Policy {
 		BlockDangerousCommands: true,
 		BlockPrivateKeys:       true,
 		BlockSecrets:           true,
+		BlockSensitivePaths:    true,
 		MaxRiskLevel:           "medium",
 		AllowSudo:              false,
 		AuditLog:               true,

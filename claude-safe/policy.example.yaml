@@ -1,6 +1,7 @@
 block_dangerous_commands: true
 block_private_keys: true
 block_secrets: true
+block_sensitive_paths: true  # block Write/Edit to .env, ~/.aws/credentials, ~/.ssh keys, /etc/passwd, etc.
 max_risk_level: medium   # safe | low | medium | high | critical
 allow_sudo: false
 audit_log: true
