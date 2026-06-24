@@ -33,3 +33,5 @@ Thumbs.db
 # Secrets / local config
 .env
 *.local.yaml
+# claude-safe
+.claude-safe/

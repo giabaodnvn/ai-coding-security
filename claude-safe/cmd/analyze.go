@@ -40,11 +40,11 @@ Examples:
   claude-safe analyze --lang go --text "db.Query(fmt.Sprintf(...), id)"
   cat generated.go | claude-safe analyze --lang go`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		pol, err := policy.Load(policyFile)
+		pol, err := loadPolicy()
 		if err != nil {
 			return fmt.Errorf("loading policy: %w", err)
 		}
-		logger := audit.New(pol.AuditLogPath, pol.AuditLog)
+		logger := newLogger(pol)
 
 		switch {
 		case analyzeDir != "":

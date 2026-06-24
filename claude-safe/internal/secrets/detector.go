@@ -105,6 +105,69 @@ var defaultRules = []Rule{
 		Pattern:  regexp.MustCompile(`(?i)(admin|root|user)\s*:\s*[^\s@]+\s*@\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}`),
 		Severity: SeverityMedium,
 	},
+
+	// ── BATCH 1: High-confidence, low false-positive ───────────────────────────
+
+	{
+		// Format: sk-ant-api<NN>-<95+ base64url chars>
+		Name:     "Anthropic API Key",
+		Pattern:  regexp.MustCompile(`sk-ant-api\d{2}-[a-zA-Z0-9_-]{95,}`),
+		Severity: SeverityCritical,
+	},
+	{
+		// Format: DefaultEndpointsProtocol=https;AccountName=...;AccountKey=<64+ base64>
+		Name:     "Azure Storage Connection String",
+		Pattern:  regexp.MustCompile(`DefaultEndpointsProtocol=https?;AccountName=[^;]+;AccountKey=[a-zA-Z0-9+/=]{64,}`),
+		Severity: SeverityCritical,
+	},
+	{
+		// Format: SG.<22 chars>.<43 chars> — exact lengths, near-zero false positives
+		Name:     "SendGrid API Key",
+		Pattern:  regexp.MustCompile(`SG\.[a-zA-Z0-9_-]{22}\.[a-zA-Z0-9_-]{43}`),
+		Severity: SeverityHigh,
+	},
+	{
+		// Legacy FCM Server Key: AAAA<7 chars>:<140+ base64url chars>
+		Name:     "Firebase FCM Server Key",
+		Pattern:  regexp.MustCompile(`AAAA[a-zA-Z0-9_-]{7}:[a-zA-Z0-9_-]{140,}`),
+		Severity: SeverityHigh,
+	},
+
+	// ── BATCH 2: Medium-confidence ────────────────────────────────────────────
+
+	{
+		// Format: hf_<34+ alphanumeric chars>
+		Name:     "Hugging Face Token",
+		Pattern:  regexp.MustCompile(`hf_[a-zA-Z0-9]{34,}`),
+		Severity: SeverityHigh,
+	},
+	{
+		// Format: AC<32 lowercase hex chars> — word boundaries prevent partial matches
+		Name:     "Twilio Account SID",
+		Pattern:  regexp.MustCompile(`\bAC[a-f0-9]{32}\b`),
+		Severity: SeverityHigh,
+	},
+
+	// ── BATCH 3: Context-dependent ────────────────────────────────────────────
+
+	{
+		// 32 hex chars have no prefix — require TWILIO_AUTH_TOKEN or twilio...auth_token context
+		Name:     "Twilio Auth Token",
+		Pattern:  regexp.MustCompile(`(?i)(TWILIO_AUTH_TOKEN|twilio.{0,10}auth.?token)\s*[:=]\s*['"]([a-f0-9]{32})['"]`),
+		Severity: SeverityHigh,
+	},
+	{
+		// 40 alphanumeric chars have no prefix — require CF_API_TOKEN or cloudflare context
+		Name:     "Cloudflare API Token",
+		Pattern:  regexp.MustCompile(`(?i)(CF_API_TOKEN|cloudflare.{0,20}(api.?token|token|key))\s*[:=]\s*['"][a-zA-Z0-9_-]{40}['"]`),
+		Severity: SeverityHigh,
+	},
+	{
+		// pk_live_ is public by design but confirms production environment; pk_test_ is safe
+		Name:     "Stripe Publishable Key",
+		Pattern:  regexp.MustCompile(`pk_live_[0-9a-zA-Z]{24,}`),
+		Severity: SeverityMedium,
+	},
 }
 
 type Detector struct {

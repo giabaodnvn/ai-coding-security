@@ -320,6 +320,34 @@ func TestScanner_Ruby(t *testing.T) {
 			wantVuln:  VulnPathTraversal,
 			wantFound: true,
 		},
+		{
+			name:      "puts logging a password",
+			lang:      LangRuby,
+			code:      `puts "user password is #{user.password}"`,
+			wantVuln:  VulnDebugEnabled,
+			wantFound: true,
+		},
+		{
+			name:      "logger.debug with token",
+			lang:      LangRuby,
+			code:      `logger.debug("api token: #{api_key}")`,
+			wantVuln:  VulnDebugEnabled,
+			wantFound: true,
+		},
+		{
+			name:      "migration column encrypted_password is not logging",
+			lang:      LangRuby,
+			code:      `t.string :encrypted_password, null: false, default: ""`,
+			wantVuln:  VulnDebugEnabled,
+			wantFound: false,
+		},
+		{
+			name:      "migration index on reset_password_token is not logging",
+			lang:      LangRuby,
+			code:      `add_index :users, :reset_password_token, unique: true`,
+			wantVuln:  VulnDebugEnabled,
+			wantFound: false,
+		},
 	}
 	runCases(t, cases)
 }

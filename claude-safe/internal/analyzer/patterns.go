@@ -543,7 +543,7 @@ var allRules = []vulnRule{
 	{
 		id: "debug-ruby-puts-password",
 		vulnType: VulnDebugEnabled, severity: SevMedium,
-		pattern:   regexp.MustCompile(`(?i)(puts|pp|p|logger\.(debug|info))\s*[^#\n]*(password|secret|token|api_key)`),
+		pattern:   regexp.MustCompile(`(?i)\b(?:puts|pp|p|logger\.(?:debug|info))[\s(][^#\n]*\b(?:password|secret|token|api_key)\b`),
 		languages: []Language{LangRuby},
 		description: "Sensitive data (password/secret/token) logged or printed",
 		remediation: "Remove logging of sensitive values; use [REDACTED] in logs",

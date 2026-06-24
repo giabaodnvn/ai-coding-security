@@ -60,11 +60,11 @@ This command is invoked automatically by .claude/hooks scripts — you don't nee
 			return nil
 		}
 
-		pol, err := policy.Load(policyFile)
+		pol, err := loadHookPolicy()
 		if err != nil {
 			return nil // don't block Claude if policy missing
 		}
-		logger := audit.New(pol.AuditLogPath, pol.AuditLog)
+		logger := newLogger(pol)
 		rep := reporter.FromEnv()
 
 		switch input.ToolName {

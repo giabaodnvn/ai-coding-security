@@ -8,9 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/claude-safe/claude-safe/internal/audit"
 	"github.com/claude-safe/claude-safe/internal/command"
-	"github.com/claude-safe/claude-safe/internal/policy"
 	"github.com/claude-safe/claude-safe/internal/risk"
 	"github.com/claude-safe/claude-safe/internal/secrets"
 )
@@ -31,12 +29,12 @@ Example:
 	RunE: func(cmd *cobra.Command, args []string) error {
 		userCmd := strings.Join(args, " ")
 
-		pol, err := policy.Load(policyFile)
+		pol, err := loadPolicy()
 		if err != nil {
 			return fmt.Errorf("loading policy: %w", err)
 		}
 
-		logger := audit.New(pol.AuditLogPath, pol.AuditLog)
+		logger := newLogger(pol)
 		validator := command.New().WithAllowList(pol.AllowList)
 		secretDetector := secrets.New()
 

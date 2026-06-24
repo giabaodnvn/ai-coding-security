@@ -37,11 +37,11 @@ Examples:
   echo "password=secret123" | claude-safe scan
   claude-safe scan --text "AWS_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE"`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		pol, err := policy.Load(policyFile)
+		pol, err := loadPolicy()
 		if err != nil {
 			return fmt.Errorf("loading policy: %w", err)
 		}
-		logger := audit.New(pol.AuditLogPath, pol.AuditLog)
+		logger := newLogger(pol)
 
 		var content string
 

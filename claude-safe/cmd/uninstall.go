@@ -122,15 +122,18 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 }
 
 func gatherUninstallSteps() []uninstallStep {
+	// Resolve the project root so uninstall works the same from any
+	// subdirectory, mirroring how the hook anchors .claude-safe paths.
+	root := resolveProjectRoot()
 	return []uninstallStep{
-		planRemoveGitHook(),
-		planCleanSettings(),
-		planRemovePolicyDir(),
+		planRemoveGitHook(root),
+		planCleanSettings(root),
+		planRemovePolicyDir(root),
 	}
 }
 
-func planRemoveGitHook() uninstallStep {
-	path := filepath.Join(".git", "hooks", "pre-commit")
+func planRemoveGitHook(root string) uninstallStep {
+	path := filepath.Join(root, ".git", "hooks", "pre-commit")
 
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -169,8 +172,8 @@ func planRemoveGitHook() uninstallStep {
 	}
 }
 
-func planCleanSettings() uninstallStep {
-	path := filepath.Join(".claude", "settings.json")
+func planCleanSettings(root string) uninstallStep {
+	path := filepath.Join(root, ".claude", "settings.json")
 
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -199,8 +202,8 @@ func planCleanSettings() uninstallStep {
 	}
 }
 
-func planRemovePolicyDir() uninstallStep {
-	dir := ".claude-safe"
+func planRemovePolicyDir(root string) uninstallStep {
+	dir := filepath.Join(root, ".claude-safe")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		return uninstallStep{skip: true}
 	}

@@ -75,16 +75,22 @@ go build -o claude-safe .
 # Scan staged changes before a commit
 ./claude-safe scan --staged
 
-# Scan a directory or file
-./claude-safe scan ./src
-./claude-safe analyze internal/handler.go
+# Scan a single file for secrets / dangerous patterns
+./claude-safe scan --file src/main.go
+
+# Analyze a file or a whole directory for code vulnerabilities
+./claude-safe analyze --file internal/handler.go
+./claude-safe analyze --dir ./src
 
 # Gate a shell command (exits non-zero if blocked by policy)
-./claude-safe run -- "rm -rf node_modules"
+./claude-safe run "rm -rf node_modules"
 ```
 
-`claude-safe init` drops a `.claude-safe/policy.yaml` (see [policy.example.yaml](claude-safe/policy.example.yaml))
-and wires the `hook` subcommand into your Claude Code hooks so every tool call gets vetted.
+`claude-safe init` sets up four things: a `.claude-safe/policy.yaml`
+(see [policy.example.yaml](claude-safe/policy.example.yaml)), a `.claude/settings.json`
+that wires the `hook` subcommand into your Claude Code hooks so every tool call gets vetted,
+a `.git/hooks/pre-commit` that blocks commits containing secrets, and a `.gitignore`
+entry excluding `.claude-safe/`.
 
 ### 2. VSCode extension
 
@@ -140,12 +146,14 @@ claude-safe — AI Coding Security Guard
 Commands:
   init        Initialize claude-safe in the current project (policy + hooks)
   scan        Scan code, files, or git diff for security issues
-              flags: --file <path>, --staged, --git-diff, --text <str>, --json
+              flags: --file <path>, --staged, --git-diff, --text <str>
   analyze     Analyze a source file for vulnerabilities (SQLi, XSS, SSRF, crypto, …)
               flags: --file <path>, --dir <path>, --lang <name>, --text <str>, --json
   hook        Process a Claude Code hook event from stdin
   run         Validate and execute a shell command after a security check
+              flags: --force
   uninstall   Remove claude-safe hooks and config from the current project
+              flags: --dry-run, --yes, --keep-policy
 
 Global flags:
   -p, --policy <file>   Path to policy file (default: .claude-safe/policy.yaml)
@@ -157,16 +165,21 @@ The policy file controls what gets blocked vs. warned. Key fields:
 block_dangerous_commands: true
 block_private_keys: true
 block_secrets: true
-max_risk_level: medium   # safe | low | medium | high | critical
+block_sensitive_paths: true   # block Write/Edit to .env, ~/.aws/credentials, ~/.ssh keys, /etc/passwd, …
+max_risk_level: medium        # safe | low | medium | high | critical
 allow_sudo: false
 audit_log: true
 audit_log_path: .claude-safe/audit.log
+notify_on_block: true
 
 allow_list: []   # exact substrings exempted from blocking
-deny_list:  []   # additional always-blocked patterns
+deny_list:  []   # reserved — parsed but not yet enforced
 ```
 
 See [`policy.example.yaml`](claude-safe/policy.example.yaml) for the full schema.
+
+> `deny_list` and `notify_on_block` are accepted in the policy file but not yet wired
+> into the enforcement engine.
 
 ---
 
